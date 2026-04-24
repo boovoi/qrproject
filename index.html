@@ -1,55 +1,100 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>AR Map Overlay</title>
-    <!-- A-Frame Library -->
-    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-    <!-- AR.js for A-Frame -->
-    <script src="https://raw.githack.com/user/repo/branch/file"></script>
-    
-    <style>
-      body { margin: 0; overflow: hidden; font-family: sans-serif; }
-      .ui-overlay {
-        position: fixed; top: 10px; left: 10px; z-index: 1000;
-        background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px;
-      }
-    </style>
-  </head>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>Project Locations Map</title>
+		<!-- Leaflet CSS -->
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+		<style>
+			/* Full-screen map for mobile */
+			body { margin: 0; padding: 0; }
+			#map { height: 48.75vw; width: 100vw; }
+			#qr-container {
+				position: absolute;
+				bottom: 35px;
+				right: 15px;
+				z-index: 1000; /* Ensure it stays above the map */
+				background: white;
+				padding: 10px;
+				border-radius: 8px;
+				box-shadow: 0 0 15px rgba(0,0,0,0.2);
+				text-align: center;
+				font-family: Arial, sans-serif;
+				font-size: 12px;
+			}
 
-  <body>
-    <div class="ui-overlay">
-      Point camera at the printed PDF map
-    </div>
+			#qrcode img {
+				margin: 0 auto;
+			}
+		</style>
+	</head>
+	<body>
+		<a-scene
+			vr-mode-ui="enabled: false"
+			embedded
+			arjs="sourceType: webcam; debugUIEnabled: false;"
+		>
+		  <!-- The Camera that tracks GPS location -->
+			<a-camera gps-camera rotation-reader></a-camera>
 
-    <!-- AR Scene -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;">
-      
-      <!-- Asset Management (Preload images/models) -->
-      <a-assets>
-        <!-- This could be a screenshot of your Leaflet map or an icon -->
-        <img id="map-overlay" src="https://imgur.com">
-      </a-assets>
+			<!-- The Project Icon (Placeholder box or image) -->
+			<!-- The coordinates will be updated by the script below -->
+		  
+			<!--</a-box>-->
+		</a-scene>
+		<div id="map"></div>
+	  
+		<!-- Container for the QR Code -->
+		<div id="qr-container">
+			<p>Scan to view on mobile:</p>
+			<div id="qrcode"></div>
+		</div>
+		
+		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+		<script>
+			// 1. Initialize map and set initial view (Latitude, Longitude, Zoom Level)
+const map = L.map('map').setView([58.4074444, -122.692001], 8);
 
-      <!-- The Marker Trigger -->
-      <!-- Replace 'path/to/map-marker.patt' with your downloaded pattern file -->
-      <a-marker type="pattern" url="map-marker.patt">
-        
-        <!-- Virtual Content: A plane that floats on the map -->
-        <a-plane 
-          position="0 0 0" 
-          rotation="-90 0 0" 
-          width="1" height="1" 
-          material="src: #map-overlay; transparent: true; opacity: 0.9;">
-        </a-plane>
+L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+	maxZoom: 20,
+	attribution: 'Google',
+	subdomains:['mt0','mt1','mt2','mt3']
+}).addTo(map);
 
-        <!-- A 3D Pin/Marker floating above a specific spot -->
-        
-        
+const projects = [
+    { name: "Project Alpha", lat: 58.207, lng: -122.6, desc: "Building a new community park." },
+    { name: "Project Beta", lat: 58.515, lng: -122.9, desc: "Sustainable energy initiative." }
+];
 
-      </a-marker>
+const projectIcon = L.icon({
+    iconUrl: 'fnfnlogo.png', // Replace with your icon URL
+    iconSize: [28, 32],
+    iconAnchor: [22, 31],
+    popupAnchor: [-3, -26]
+});
 
-      <!-- The Camera -->
-      
-    </a-scene>
-  </body>
+projects.forEach(project => {
+    L.marker([project.lat, project.lng], { icon: projectIcon })
+        .addTo(map)
+        .bindPopup(`<b>${project.name}</b><br>${project.desc}`);
+});
+
+const params = new URLSearchParams(window.location.search);
+const targetId = params.get('loc'); // Looks for ?loc=site1
+
+if (targetId && projects[targetId]) {
+    const target = projects[targetId];
+    map.setView([target.lat, target.lng], 16); // Automatically zoom to the spot
+    target.marker.openPopup(); // Automatically open the description
+}
+			
+			new QRCode(document.getElementById("qrcode"), {
+				text: window.location.href,
+				width: 128,
+				height: 128
+			});
+		</script>
+	</body>
 </html>
