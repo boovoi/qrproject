@@ -20,9 +20,11 @@
         var map = L.map('map').setView([45.523, -122.676], 13);
 
         // 2. Add a Base Map Layer (OpenStreetMap)
-        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+			L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+				maxZoom: 20,
+				attribution: 'Google',
+				subdomains:['mt0','mt1','mt2','mt3']
+			}).addTo(map);
 
         // 3. Add Example Feature Layers
         // Layer A: A Polygon representing a Park
