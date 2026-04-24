@@ -49,14 +49,24 @@
             style: { color: "#ff7800", weight: 5 }
         }).bindPopup("<b>Example Trail</b><br>Layer 2: Lines").addTo(map);
 
-        // 4. Layer Control (Toggle layers on/off)
+		var locationLayer = L.geoJSON({
+            "type": "Feature",
+            "properties": {"name": "Project Location"},
+            "geometry": {
+                "type": "Point",
+                "coordinates": [-122.68, 58.52]
+            }
+        }).bindPopup("<b>Location</b><br>Layer 3: Point").addTo(map);
+		
+        // 5. Layer Control (Toggle layers on/off)
         var overlays = {
             "Parks": parkLayer,
-            "Trails": trailLayer
+            "Trails": trailLayer,
+			"Location": locationLayer
         };
         L.control.layers(null, overlays).addTo(map);
 
-        // 5. Geolocation (Find the user on the map)
+        // 6. Geolocation (Find the user on the map)
         map.locate({setView: true, maxZoom: 8});
         map.on('locationfound', function(e) {
             L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
