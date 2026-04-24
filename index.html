@@ -1,100 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-		<title>Project Locations Map</title>
-		<!-- Leaflet CSS -->
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-		<style>
-			/* Full-screen map for mobile */
-			body { margin: 0; padding: 0; }
-			#map { height: 48.75vw; width: 100vw; }
-			#qr-container {
-				position: absolute;
-				bottom: 35px;
-				right: 15px;
-				z-index: 1000; /* Ensure it stays above the map */
-				background: white;
-				padding: 10px;
-				border-radius: 8px;
-				box-shadow: 0 0 15px rgba(0,0,0,0.2);
-				text-align: center;
-				font-family: Arial, sans-serif;
-				font-size: 12px;
-			}
+<html>
+<head>
+    <title>Mobile Geo-Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    <style>
+        body { padding: 0; margin: 0; }
+        #map { height: 100vh; width: 100vw; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
 
-			#qrcode img {
-				margin: 0 auto;
-			}
-		</style>
-	</head>
-	<body>
-		<a-scene
-			vr-mode-ui="enabled: false"
-			embedded
-			arjs="sourceType: webcam; debugUIEnabled: false;"
-		>
-		  <!-- The Camera that tracks GPS location -->
-			<a-camera gps-camera rotation-reader></a-camera>
+    <!-- Leaflet JS Library -->
+    <script src="https://unpkg.com"></script>
+    <script>
+        // 1. Initialize the map
+        var map = L.map('map').setView([45.523, -122.676], 13);
 
-			<!-- The Project Icon (Placeholder box or image) -->
-			<!-- The coordinates will be updated by the script below -->
-		  
-			<!--</a-box>-->
-		</a-scene>
-		<div id="map"></div>
-	  
-		<!-- Container for the QR Code -->
-		<div id="qr-container">
-			<p>Scan to view on mobile:</p>
-			<div id="qrcode"></div>
-		</div>
-		
-		<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-		<script>
-			// 1. Initialize map and set initial view (Latitude, Longitude, Zoom Level)
-const map = L.map('map').setView([58.4074444, -122.692001], 8);
+        // 2. Add a Base Map Layer (OpenStreetMap)
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-	maxZoom: 20,
-	attribution: 'Google',
-	subdomains:['mt0','mt1','mt2','mt3']
-}).addTo(map);
+        // 3. Add Example Feature Layers
+        // Layer A: A Polygon representing a Park
+        var parkLayer = L.geoJSON({
+            "type": "Feature",
+            "properties": {"name": "Example Forest Park"},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[-122.68, 45.52], [-122.67, 45.52], [-122.67, 45.53], [-122.68, 45.53], [-122.68, 45.52]]]
+            }
+        }).bindPopup("<b>Example Park</b><br>Layer 1: Polygons").addTo(map);
 
-const projects = [
-    { name: "Project Alpha", lat: 58.207, lng: -122.6, desc: "Building a new community park." },
-    { name: "Project Beta", lat: 58.515, lng: -122.9, desc: "Sustainable energy initiative." }
-];
+        // Layer B: A LineString representing a Trail
+        var trailLayer = L.geoJSON({
+            "type": "Feature",
+            "properties": {"name": "Example Hiking Trail"},
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [[-122.69, 45.51], [-122.68, 45.52], [-122.67, 45.51]]
+            }
+        }, {
+            style: { color: "#ff7800", weight: 5 }
+        }).bindPopup("<b>Example Trail</b><br>Layer 2: Lines").addTo(map);
 
-const projectIcon = L.icon({
-    iconUrl: 'fnfnlogo.png', // Replace with your icon URL
-    iconSize: [28, 32],
-    iconAnchor: [22, 31],
-    popupAnchor: [-3, -26]
-});
+        // 4. Layer Control (Toggle layers on/off)
+        var overlays = {
+            "Parks": parkLayer,
+            "Trails": trailLayer
+        };
+        L.control.layers(null, overlays).addTo(map);
 
-projects.forEach(project => {
-    L.marker([project.lat, project.lng], { icon: projectIcon })
-        .addTo(map)
-        .bindPopup(`<b>${project.name}</b><br>${project.desc}`);
-});
-
-const params = new URLSearchParams(window.location.search);
-const targetId = params.get('loc'); // Looks for ?loc=site1
-
-if (targetId && projects[targetId]) {
-    const target = projects[targetId];
-    map.setView([target.lat, target.lng], 16); // Automatically zoom to the spot
-    target.marker.openPopup(); // Automatically open the description
-}
-			
-			new QRCode(document.getElementById("qrcode"), {
-				text: window.location.href,
-				width: 128,
-				height: 128
-			});
-		</script>
-	</body>
+        // 5. Geolocation (Find the user on the map)
+        map.locate({setView: true, maxZoom: 16});
+        map.on('locationfound', function(e) {
+            L.marker(e.latlng).addTo(map).bindPopup("You are here").openPopup();
+        });
+    </script>
+</body>
 </html>
+
