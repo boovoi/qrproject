@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AR Map Overlay</title>
+    <!-- A-Frame Library -->
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+    <!-- AR.js for A-Frame -->
+    <script src="https://raw.githack.com/user/repo/branch/file"></script>
+    
+    <style>
+      body { margin: 0; overflow: hidden; font-family: sans-serif; }
+      .ui-overlay {
+        position: fixed; top: 10px; left: 10px; z-index: 1000;
+        background: rgba(0,0,0,0.7); color: white; padding: 10px; border-radius: 5px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="ui-overlay">
+      Point camera at the printed PDF map
+    </div>
+
+    <!-- AR Scene -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;">
+      
+      <!-- Asset Management (Preload images/models) -->
+      <a-assets>
+        <!-- This could be a screenshot of your Leaflet map or an icon -->
+        <img id="map-overlay" src="https://imgur.com">
+      </a-assets>
+
+      <!-- The Marker Trigger -->
+      <!-- Replace 'path/to/map-marker.patt' with your downloaded pattern file -->
+      <a-marker type="pattern" url="map-marker.patt">
+        
+        <!-- Virtual Content: A plane that floats on the map -->
+        <a-plane 
+          position="0 0 0" 
+          rotation="-90 0 0" 
+          width="1" height="1" 
+          material="src: #map-overlay; transparent: true; opacity: 0.9;">
+        </a-plane>
+
+        <!-- A 3D Pin/Marker floating above a specific spot -->
+        
+        
+
+      </a-marker>
+
+      <!-- The Camera -->
+      
+    </a-scene>
+  </body>
+</html>
